@@ -41,7 +41,6 @@
     <tr>
         <th>#</th>
         <th>Продукт</th>
-        <th>Размер</th>
         <th>Кол-во (кг)</th>
         <th>Цена</th>
         <th>Сумма (UZS)</th>
@@ -54,7 +53,6 @@
             <td>{{ forloop.counter }}</td>
             <td>
                 {{ order_item.product.title }}</td>
-            <td>{{ order_item.product.size }}</td>
             <td>{{ order_item.count }} кг</td>
             <td>{{ order_item.price }}
                 {% if order_item.total_uzs == 0 %}
@@ -66,10 +64,9 @@
 
     <tr style="background:#ccc;">
         <td></td>
+        <td></td>
+        <td></td>
         <td>ИТОГО К ОПЛАТЕ</td>
-        <td></td>
-        <td></td>
-        <td></td>
         <td>{{ order_items_total.total_uzs__sum|default:0 }}</td>
         <td>{{ order_items_total.total_usd__sum|default:0 }}</td>
     </tr>
