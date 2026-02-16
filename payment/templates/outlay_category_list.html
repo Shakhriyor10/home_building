@@ -1,0 +1,61 @@
+{% extends 'layouts/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>Добавить категория расходов</h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                    </div>
+                </div>
+                <form method="post" action="{% url 'outlay_cat' %}">
+                    {% csrf_token %}
+                    {% for f in forms %}
+                        <div class=" col-md-12">
+                            {{ f.label_tag }}
+                            {{ f|add_class:'form-control' }}
+                        </div>
+                    {% endfor %}
+                    <button class="btn btn-primary mt-2 float-right" type="submit">Добавить</button>
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>Категория расходов</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                        <tr>
+                            <th class="align-middle">Наименование категории расхода</th>
+                            <th class="align-middle pr-7">Тип категории расхода</th>
+                        </tr>
+                        </thead>
+                        {% for el in outlay_category %}
+                            <tr class="btn-ravel-trigger">
+                                <td class="py-2 mb-2">{{ el.name }}</td>
+                                <td class="py-2">{{ el.get_type_display }}</td>
+                                <td class="py-2"><a href="{% url 'outlay_cat_update' el.pk %}"><i
+                                        class="fa fa-pencil"></i></a></td>
+                                <td class="py-2"><a href="{% url 'outlay_cat_detail' el.pk %}"><i
+                                        class="fas fa-eye"></i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

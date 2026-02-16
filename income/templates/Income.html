@@ -1,0 +1,124 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Список приходов</h4>
+                        <form class="col" method="GET" id="status_form">
+                            <input id="id_page_number" name="page" type="hidden"
+                                   {% if selected_page %}value="{{ selected_page }}"{% endif %}>
+                            <select class="form-control col-4 ml-auto mt-2" name="status"
+                                    onchange="document.getElementById('status_form').submit()">
+                                <option value="">
+                                    Все
+                                </option>
+
+                                <option value="0" {% if selected_status == '0' %}selected{% endif %}>
+                                    Открытые
+                                </option>
+
+                                <option value="1" {% if selected_status == '1' %}selected{% endif %}>
+                                    Закрытые
+                                </option>
+                                <option value="2" {% if selected_status == '2' %}selected{% endif %}>
+                                    Завершенный
+                                </option>
+                                <option value="3" {% if selected_status == '3' %}selected{% endif %}>
+                                    Удаленные
+                                </option>
+                            </select>
+                        </form>
+                        <div class="col-sm-3 p-md-0 justify-content-sm-end align-items-center mt-2 mt-sm-0 d-flex">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'income_create' %}">Добавить</a></li>
+                                <li class="breadcrumb-item active"><a href="javascript:void(0)"></a></li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <div class="table-responsive-sm">
+                            <table class="table table-striped table-bordered ">
+                                <thead class="">
+                                <tr>
+                                    <th style="width: 50px" class="text-center">#</th>
+                                    <th>Дата</th>
+                                    <th>Итог</th>
+                                    <th>Статус</th>
+                                    <th>Контрагент</th>
+                                    <th class="text-center" style="width: 200px">Действие</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for income in incomes %}
+                                    {% if income.status != 4 %}
+                                        <tr>
+                                            <th>{{ forloop.counter }}</th>
+                                            <td>{{ income.created|date:'d.m.Y  H:i' }}</td>
+                                            <td>{{ income.total_uzs }}сум | {{ income.total_usd }}$</td>
+                                            <td><span
+                                                    class="badge{% if income.status == 0 %} badge-primary {% elif income.status == 1 %} badge-warning {% elif income.status == 2 %} badge-success {% else %} badge-danger{% endif %} text-white">{{ income.get_status_display }}</span>
+                                            </td>
+                                            <td>{{ income.counter_party }}</td>
+                                            <td class="text-center" style="width: 140px;">
+                                                <a href="{% url 'income_detail' income.id %}"
+                                                   class="btn btn-primary shadow btn-sm sharp mr-1 text-light"><i
+                                                        class="fa fa-eye"></i></a>
+
+                                                {#                                                    <a href="{% url 'income_update' income.id %}"#}
+                                                {#                                                       class="btn btn-primary shadow btn-sm sharp mr-1"><i#}
+                                                {#                                                            class="fa fa-pencil"></i></a>#}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mr-auto ml-auto">
+                            <nav aria-label="Page navigation example">
+                                {% if is_paginated %}
+                                    {% if page_obj.has_previous %}
+                                        <button class="btn btn-outline-primary mb-4"
+                                                onclick="$('#id_page_number').val(1); $('#status_form').submit()">
+                                            First
+                                        </button>
+                                        <button class="btn btn-outline-primary mb-4"
+                                                onclick="$('#id_page_number').val({{ page_obj.previous_page_number }}); $('#status_form').submit()">
+                                            Previous
+                                        </button>
+                                    {% endif %}
+
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <button class="btn btn-primary mb-4"
+                                                    onclick="$('#id_page_number').val({{ num }}); $('#status_form').submit()">{{ num }}</button>
+                                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                            <button class="btn btn-outline-primary mb-4"
+                                                    onclick="$('#id_page_number').val({{ num }}); $('#status_form').submit()">{{ num }}</button>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <button class="btn btn-outline-primary mb-4"
+                                                onclick="$('#id_page_number').val({{ num }}); $('#status_form').submit()">
+                                            Next
+                                        </button>
+                                        <button class="btn btn-outline-primary mb-4"
+                                                onclick="$('#id_page_number').val({{ num }}); $('#status_form').submit()">
+                                            Last
+                                        </button>
+                                    {% endif %}
+
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

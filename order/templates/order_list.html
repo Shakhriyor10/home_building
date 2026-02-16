@@ -1,0 +1,76 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Заказы</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'order_create' %}">Добавить</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)"></a></li>
+                </ol>
+            </div>
+        </div>
+        <div class="card">
+        <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input value="{{ startdate }}" class="form-control" type="date"
+                                   name="startdate">
+                        </div>
+                        <div class="col-md-6">
+                            <input value="{{ enddate }}" class="form-control" type="date"
+                                   name="enddate">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary">Поиск
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+            <br>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th class="align-middle">#</th>
+                            <th class="align-middle pr-7">Контр агент</th>
+                            <th class="align-middle">Сумма(Сум)</th>
+                            <th class="align-middle">Сумма(Доллар)</th>
+                            <th class="align-middle">Курс валюты</th>
+                            <th class="align-middle">Действие</th>
+                        </tr>
+                    </thead>
+                        {% for order in orders %}
+                            <tr class="btn-ravel-trigger">
+                                <td class="py-2 mb-2">{{ order.id }}</td>
+                                <td class="py-2">{{ order.counter_party }}</td>
+                                <td class="py-2">{{ order.total_uzs }}</td>
+                                <td class="py-2">{{ order.total_usd }}</td>
+                                <td class="py-2">{{ order.rate }}</td>
+                                <td class="py-2"><a class="mr-3" href="{% url 'order_update' order.pk %}"><i class="fa fa-pencil"></i></a><a href="{% url 'order_detail' order.pk %}"><i class="fa fa-eye"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

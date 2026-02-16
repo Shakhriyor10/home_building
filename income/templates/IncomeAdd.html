@@ -1,0 +1,61 @@
+{% extends 'layouts/base.html' %}
+{% load widget_tweaks static poll_extras %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'vendor/select2/css/select2.min.css' %}" type="text/css">
+{% endblock extra_css %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Добавить приход</h4>
+                    </div>
+                    <div class="card-body">
+                        <form class="row justify-content-end" method="post">
+                            {% csrf_token %}
+                            <div class="col-12 pl-0 pr-3 row">
+                                {% for f in form %}
+                                    {% if f.name == 'product_category' %}
+                                        <div class="col pl-0">
+                                            {{ f.label_tag }}
+                                            <select class="form-control select2-example" name="product_category"
+                                                    id="id_product_category">
+                                                {% for product_category in product_categories %}
+                                                    <option value="{{ product_category.id }}">{{ product_category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    {% else %}
+                                        <div class="col pl-0">
+                                            {{ f.label_tag }}
+                                            {{ f|add_class:'form-control select2-example'|attr:'autocomplete:off' }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                <div class="col-auto d-flex align-items-end">
+                                    <button class="btn btn-primary float-right" type="submit">Добавить</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'vendor/select2/js/select2.full.min.js' %}"></script>
+    <script>
+        $('.select2-example').select2({
+            placeholder: 'Выбрать'
+        });
+        $(document).ready(function () {
+            $('.select2-container--default').addClass('form-control');
+            $('.select2-selection--single').attr('style', 'border: 0;');
+        })
+    </script>
+{% endblock extra_js %}

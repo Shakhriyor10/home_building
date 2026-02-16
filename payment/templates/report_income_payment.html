@@ -1,0 +1,219 @@
+{% extends 'layouts/base.html' %}
+{% load static poll_extras humanize widget_tweaks %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'vendor/select2/css/select2.min.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+    <!-- row -->
+    <div class="container-fluid">
+        <div class="col-md-4">
+            <h2 class="">Отчеты доходов</h2>
+        </div>
+        <div class="col-xl-12 col-xxl-12">
+            <div class="row">
+                <div class="col-xl-12 col-xxl-12 col-lg-12 col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="container mt-0 mb-0">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <input value="{{ startdate }}" class="form-control" type="date"
+                                                           name="startdate">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <input value="{{ enddate }}" class="form-control" type="date"
+                                                           name="enddate">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <select class="form-control select2-example bg-white"
+                                                            autocomplete="off" name="counterparty"
+                                                            id="">
+                                                        <option value="all" {% if selected_counterparty == 'all' %}
+                                                                selected{% endif %}>Контр Агенты
+                                                        </option>
+                                                        {% for counterparty in counterparties %}
+                                                            <option
+                                                                    {% if counterparty.id|to_int == selected_counterparty|to_int %}
+                                                                        selected {% endif %}
+                                                                        value="{{ counterparty.id }}">{{ counterparty }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <a href="{% url 'report_income' %}"
+                                                               class="btn btn-danger float-left">Убрать</a>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <button type="submit" class="btn btn-primary">Поиск
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-responsive-sm mb-0">
+                                    <thead class="thead-primary">
+                                    <tr>
+                                        <th><strong>Юзер</strong></th>
+                                        <th><strong>Сумма</strong></th>
+                                        <th><strong>Метод оплаты</strong></th>
+                                        <th><strong>Описание</strong></th>
+                                        <th><strong>Контр Агент</strong></th>
+                                        <th><strong>Создано</strong></th>
+                                        <th><strong></strong></th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for income in report_income_payments %}
+                                        <tr>
+                                            <td>{{ income.user }}</td>
+                                            {% if income.payment_type == 'uzs' %}
+                                                <td>{{ income.amount }} сум</td>
+                                            {% elif income.payment_type == 'usd' %}
+                                                <td>{{ income.amount }} $</td>
+                                            {% endif %}
+                                            <td>{{ income.get_payment_method_display }}</td>
+                                            <td>
+                                                <a href=""
+                                                   data-toggle="modal"
+                                                   data-target="#IncomeTextModal"
+                                                   onclick="IncomeTextModalShow('{{ income.user }}', '{{ income.comment }}')">
+                                                    <p>{% if income.comment|length > 50 %}
+                                                        {{ income.comment|slice:50 }}...
+                                                    {% else %}
+                                                        {{ income.comment }}
+                                                    {% endif %}</p>
+                                                </a>
+                                            </td>
+                                            <td>{{ income.counterparty_payment|default:'-' }}</td>
+                                            <td>{{ income.created }}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    {% endfor %}
+                                    <tr class="table-primary">
+                                        <td colspan="5">
+                                            <h2>Общий итог</h2>
+                                        </td>
+
+                                        <td>
+                                            <input class="form-control-sm mt-1 border border-secondary bg-primary text-white border-primary"
+                                                   readonly
+                                                    {% if dollar_amount.amount__sum != None %}
+                                                   value="${{ dollar_amount.amount__sum }}"
+                                                    {% else %}
+                                                   value="$ 0"
+                                                    {% endif %}
+                                                   type="text" name="name_dollar_list">
+                                        </td>
+                                        <td>
+                                            <input class="form-control-sm mt-1 border border-secondary bg-primary text-white border-primary"
+                                                   readonly
+                                                    {% if sum_amount.amount__sum != None %}
+                                                   value="{{ sum_amount.amount__sum }} сум"
+                                                    {% else %}
+                                                   value="0 сум"
+                                                    {% endif %}
+                                                   type="text" name="name_sum_list">
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <div class="float-right mt-2 ml-2">
+                                    {% if page_obj.has_other_pages %}
+                                        <div class="pegination">
+                                            <div class="nav-links">
+                                                {% if page_obj.has_previous %}
+                                                    <a class="page-numbers btn btn-dark btn-xxs"
+                                                       href="?page=
+                                                               {{ page_obj.previous_page_number }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_counterparty != '' %}&category={{ selected_category }}{% endif %}">&laquo;</a>
+                                                {% endif %}
+                                                {% for p in page_obj.paginator.page_range %}
+
+                                                    {% if page_obj.number == p %}
+                                                        <span class="page-numbers current btn btn-light btn-xxs">{{ p }}</span>
+                                                    {% elif p > page_obj.number|add:-3 and p < page_obj.number|add:3 %}
+                                                        <a class="page-numbers btn btn-primary btn-xxs"
+                                                           href="?page=
+                                                                   {{ p }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_counterparty != '' %}&category={{ selected_counterparty }}{% endif %}">{{ p }}</a>
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% if page_obj.has_next %}
+                                                    <a class="page-numbers btn btn-dark btn-xxs"
+                                                       href="?page=
+                                                               {{ page_obj.next_page_number }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_counterparty != '' %}&category={{ selected_counterparty }}{% endif %}">&raquo;</a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="IncomeTextModal" tabindex="-1" role="dialog" aria-labelledby="IncomeTextModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="IncomeTextModalLabel">Описание Дохода <span id="id_income_user"></span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <span id="income_text_name_id"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'vendor/select2/js/select2.full.min.js' %}"></script>
+    <script>
+        function IncomeTextModalShow(user, comment) {
+            $(`#id_income_user`).text(user)
+            $(`#income_text_name_id`).text(comment)
+        }
+
+        $(document).ready(function () {
+            $('.select2-container--default').addClass('form-control')
+            $('.select2-selection--single').attr('style', 'border: 0')
+        });
+        $('.select2-example').select2({
+            placeholder: 'Выбрать'
+        });
+    </script>
+{% endblock extra_js %}

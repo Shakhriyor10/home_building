@@ -1,0 +1,679 @@
+{% extends 'layouts/base.html' %}
+{% load poll_extras static %}
+{% block extra_css %}
+    <style>
+        {#.order-item-table th {#}
+        {#    min-width: 150px;#}
+        {# }#}
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header d-block">
+                        <div class="row">
+                            <div class="col"><h4 class="font-weight-light mb-0"><span
+                                    class="font-weight-bold">Заказ №{{ order.id }}</span>
+                                от {{ order.created|date:'d.m.Y  H:i' }}
+                                |
+                                <span class="badge{% if order.status == 0 %} badge-primary {% elif order.status == 1 or order.status == 2 %} badge-warning {% elif order.status == 3 %} badge-success {% else %} badge-danger{% endif %} text-white">{{ order.get_status_display }}</span>
+                            </h4></div>
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-primary sharp" data-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <svg width="20px" height="20px" viewBox="0 0 24 24" version="1.1">
+                                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                            <rect x="0" y="0" width="24" height="24"></rect>
+                                            <circle fill="#fff" cx="5" cy="12" r="2"></circle>
+                                            <circle fill="#fff" cx="12" cy="12" r="2"></circle>
+                                            <circle fill="#fff" cx="19" cy="12" r="2"></circle>
+                                        </g>
+                                    </svg>
+                                </button>
+                                <div class="dropdown-menu py-0" x-placement="bottom-start"
+                                     style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">
+                                    <ul class="align-items-center">
+                                        <li class="text-center">
+                                            <button class="btn btn-xs mr-3 w-100"
+                                                    onclick="printTable1('for_print')">
+                                                Распечатать фактуру
+                                            </button>
+                                        </li>
+                                        {% if order.status == 0 or order.status == 1 %}
+                                            <li class="text-center">
+                                                <form method="post" class=" w-100"
+                                                      action="{% url 'order_action' order.id %}">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="move_to_trash">
+                                                    <input type="hidden" name="data" value="{{ order.pk }}">
+                                                    <button type="submit" class="btn btn-xs w-100">
+                                                        Переместить в корзину
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+
+                                        {% if  order.status == 0 %}
+                                            <li class="text-center">
+                                                <form class=" w-100" action="{% url 'order_action' order.id %}"
+                                                      method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="close_order">
+                                                    <input type="hidden" name="data" value="{{ order.id }}">
+                                                    <button type="submit" class="btn btn-xs btn-success btn-block">
+                                                        Закрыть
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-auto">
+                                <h5>Агент:
+                                    <button type="button" class="btn btn-primary btn-xs p-2" data-toggle="modal"
+                                            data-target="#exampleModal">
+                                        {{ order.counter_party }}
+                                    </button>
+                                </h5>
+                            </div>
+                            <div class="col-auto ml-auto mt-3">
+                                <h5>Итог (UZS): <span
+                                        style="font-weight: 100; margin-right: 50px">{{ order.total_uzs }} сум</span>Итог
+                                    (USD): <span style="font-weight: 100">{{ order.total_usd }} $</span></h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+                        </div>
+                    </div>
+                    {##}
+                    {#                    <div class="d-flex justify-content-end mt-3 mx-4 mb-0 pr-1">#}
+                    {#                        <button class="btn btn-success" type="button"><i class="fa fa-print"></i> Печать</button>#}
+                    {#                    </div>#}
+                    <div class="card-body">
+                        <h4 class="mt-3">Список товаров</h4>
+                        <div class="table-responsive p-0">
+                            <table class="table table-bordered table-striped verticle-middle order-item-table">
+                                <thead class="">
+                                <tr>
+                                    <th style="min-width: 300px">Продукт</th>
+                                    <th style="min-width: 100px">Размер</th>
+                                    <th style="min-width: 100px">Количество</th>
+                                    <th style="min-width: 100px">Цена</th>
+                                    <th style="min-width: 150px">Сумма (UZS)</th>
+                                    <th style="min-width: 150px">Сумма (USD)</th>
+                                    {% if order.status == 0 or order.status == 2 or order.status == 3 %}
+                                        <th>Действие</th>
+                                    {% endif %}
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for order_item in order_items %}
+                                    <tr>
+                                        <td>
+                                            {{ order_item.product.title }}
+                                        </td>
+                                        <td>{{ order_item.product.size }}</td>
+                                        <td>{{ order_item.count }}</td>
+                                        <td class=>{{ order_item.price }}
+                                            {% if order_item.total_uzs == 0 %}
+                                                ${% else %}сум{% endif %}</td>
+                                        {% if order.status != 2 %}
+                                            <td class="divide">{{ order_item.total_uzs }} сум</td>
+                                            <td class="divide">{{ order_item.total_usd }} $</td>
+                                        {% endif %}
+                                        {% if order.status == 0 %}
+                                            <td>
+                                                <form action="{% url 'order_action' order.pk %}"
+                                                      method="post">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action"
+                                                           value="delete_order_item">
+                                                    <input type="hidden" name="data"
+                                                           value="{{ order_item.id }}">
+                                                    <button class="btn btn-danger btn-sm sharp" type="submit"><i
+                                                            class="fa fa-trash"></i></button>
+                                                </form>
+                                            </td>
+                                        {% endif %}
+                                        {% if order.status == 3 %}
+                                            <td>
+                                                <button id="order_change_item_{{ order_item.id }}_button"
+                                                        class="btn btn-danger btn-sm sharp" type="button"
+                                                        data-toggle="modal"
+                                                        data-target="#orderChangeItemAdd"
+                                                        onclick="orderChangeItem(`order_change_item_{{ order_item.id }}_button`)"
+                                                        data-product-name="{{ order_item.product.title }} | {{ order_item.product.size }}"
+                                                        data-product-count="{{ order_item.count }}"
+                                                        data-product-id="{{ order_item.id }}">
+                                                    <i class="fa fa-arrow-down"></i>
+                                                </button>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if order.status == 3 %}
+                            <h4 class="mt-3">Список возвращенных товаров</h4>
+                            <div class="table-responsive p-0">
+                                <table class="table table-bordered table-striped verticle-middle order-item-table">
+                                    <thead class="">
+                                    <tr>
+                                        <th style="min-width: 300px">Продукт</th>
+                                        <th style="min-width: 100px">Размер</th>
+                                        <th style="min-width: 100px">Кол-во</th>
+                                        <th style="min-width: 100px">Цена</th>
+                                        <th style="min-width: 150px">Сумма (UZS)</th>
+                                        <th style="min-width: 150px">Сумма (USD)</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for order_return_item in order_return_items %}
+                                        <tr>
+                                            <td>
+                                                {{ order_return_item.order_item.product.title }}
+                                            </td>
+                                            <td>{{ order_return_item.order_item.product.size }}</td>
+                                            <td>{{ order_return_item.count }}</td>
+                                            <td class=>{{ order_return_item.order_item.price }}
+                                                {% if order_return_item.total_uzs == 0 %}
+                                                    ${% else %}сум{% endif %}</td>
+                                            <td class="divide">{{ order_return_item.total_uzs }}
+                                                сум
+                                            </td>
+                                            <td class="divide">{{ order_return_item.total_usd }} $
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% if order.status == 1 or order.status == 3 %}
+                        <div class="card-header ">
+                            <h4 class="card-title"> Добавить оплату для заказа </h4>
+                        </div>
+                        <form id="payment_add" class="card-body row" method="post"
+                              action="{% url 'order_action' order.id %}">
+                            <input type="hidden" name="action" value="pay_order">
+                            {% csrf_token %}
+                            <div class="col-2">
+                                <label>Сумма</label>
+                                <input autocomplete="off" class="form-control" required type="number" step="any"
+                                       min="0.1" name="amount">
+                            </div>
+
+                            {% include 'layouts/payment_layout.html' %}
+                            <div class="col-1">
+                                <label>За доставку?</label>
+                                <input type="checkbox" name="for_deliver">
+                            </div>
+                            <div class="col">
+                                <label>Комментарии</label>
+                                <input autocomplete="off" class="form-control" type="text" name="comment">
+                            </div>
+                        </form>
+
+                        <button class="btn btn-sm btn-primary m-3 float-right"
+                                type="submit" form="payment_add">
+                            Добавить
+                        </button>
+                        <div class="card-header">
+                            <h4 class="card-title"> Список оплат по заказу </h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-striped verticle-middle order-item-table">
+                                <thead class="">
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Сумма</th>
+                                    <th>Валюта</th>
+                                    <th>Метод оплаты</th>
+                                    <th>Комментарии</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for payment in payments %}
+                                    <tr>
+                                        <td>{{ payment.created }}</td>
+                                        <td>{{ payment.amount }}</td>
+                                        <td>{{ payment.get_payment_type_display }}</td>
+                                        <td>{{ payment.get_payment_method_display }}</td>
+                                        <td>{{ payment.comment }}</td>
+                                    </tr>
+                                {% endfor %}
+                                <tfoot>
+                                <tr class="bg-light">
+                                    <th></th>
+                                    <th>Итог (UZS):</th>
+                                    <th>{{ total_uzs }}</th>
+                                    <th>Итог (USD):</th>
+                                    <th>{{ total_usd }}</th>
+                                </tr>
+                                </tfoot>
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+
+                    <!-- If order not closed -->
+                    <div class="row">
+                        {% if order.status == 0 %}
+                            <div class="col-8">
+                                <div class="card h-auto">
+                                    <div class="card-header ">
+                                        <h4>Продукт</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="card-title">Добавить продукт в заказа </h4>
+                                        <form id="order_items_add" method="post"
+                                              action="{% url 'order_detail' order.id %}">
+                                            {% csrf_token %}
+                                        </form>
+                                        <button class="btn btn-sm btn-primary mt-3 btn-block"
+                                                type="submit" form="order_items_add">
+                                            Добавить
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                            <div class="card">
+                                <div class="card-header  bg-primary "><h4 class="card-title text-light">Продукты в
+                                    складе</h4>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="tab-content">
+                                        {% for product in products %}
+                                            <a class="d-block mouse-pointer"
+                                               ondblclick="{% if product.count > 0 %}addOrderItem(parseInt({{ product.id }}), '{{ product.title }} | {{ product.size }}', parseFloat('0'), true, parseFloat({{ product.count }})){% endif %}">---- {{ product.title }} | {{ product.size }}
+                                                <span class="bg-success btn btn-xs p-1 text-white">{{ product.count }}</span></a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="for_print" style="display: none; background-color: #ffffff !important;">
+        {% include 'layouts/order_print_account.html' %}
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1"
+         aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="exampleModalLabel">{{ order.counter_party.name }}
+                        | {{ order.counter_party.org_name|default:'-' }}</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body d-inline">
+                    <div class="row my-2">
+                        <p class="mb-0"><b></b></p>
+                    </div>
+                    <div class="row my-2">
+                        <p class="mb-0"><b> </b></p>
+                    </div>
+                    <table class="table table-striped table-bordered">
+                        <tr>
+                            <th>Номер телефона:</th>
+                            <td>{{ order.counter_party.phone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Дополнительный номер телефона:</th>
+                            <td>{{ order.counter_party.phone2|default:'-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Баланс(Сум):</th>
+                            <td>{{ order.counter_party.balance_uzs }}</td>
+                        </tr>
+                        <tr>
+                            <th>Баланс(Доллар):</th>
+                            <td>{{ order.counter_party.balance_usd }}</td>
+                        </tr>
+                    </table>
+
+
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'counter_party_detail' order.counter_party.id %}"
+                       class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="orderChangeItemAdd" tabindex="-1"
+         aria-labelledby="orderChangeItemAddLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"
+                        id="exampleModalLabel">Возврат продукта (<span id="change_product_name"></span>)</h5>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="order_change_form" action="{% url 'order_action' order.id %}" method="post">
+                        <div class="col">
+                            {% csrf_token %}
+                            <input id="id_order_changed_product_id" type="hidden" name="order_return_item_id"
+                                   value="">
+                            <input id="id_action" type="hidden" name="action"
+                                   value="order_return_item">
+                        </div>
+                        <div class="col-auto">
+                            <label for="id_order_change_item_count">Количество:</label>
+                            <input id="id_order_change_item_count" type="number" class="form-control" required
+                                   step="any" max="" placeholder="" name="order_change_item_count"
+                                   value="{{ product.id }}">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" form="order_change_form"
+                            class="btn btn-primary">Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+
+    <script src="{% static 'js/plugins-init/bootstrap-tabs.js' %}"></script>
+    <script src="{% static 'js/qrcode.min.js' %}"></script>
+    <script src="{% static 'vendor/select2/js/select2.full.min.js' %}"></script>
+
+    <script>
+
+
+        function orderChangeItem(id) {
+            $('#change_product_name').text($(`#${id}`).attr('data-product-name'));
+            $('#id_order_change_item_count').prop('max', $(`#${id}`).attr('data-product-count'));
+            $('#id_order_change_item_count').prop('placeholder', $(`#${id}`).attr('data-product-count'));
+            $('#id_order_changed_product_id').val($(`#${id}`).attr('data-product-id'));
+        }
+
+
+        function printTable1(divName) {
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            $(body).css('background-color', '#fff');
+            window.print();
+
+            location.reload()
+
+        }
+
+        function printTable2(divName) {
+            var printContents = document.getElementById(divName).innerHTML;
+            var originalContents = document.body.innerHTML;
+            document.body.innerHTML = printContents;
+            $(body).css('background-color', '#fff');
+            $('#services_table').css('display', 'none');
+            window.print();
+
+            location.reload()
+
+        }
+
+
+        let rate = '{{ ps.rate|default:0 }}';
+
+        function printOrder() {
+            var originalContents = document.body.innerHTML;
+            template = ``
+        }
+
+        function printTable(invoice_products_id, invoice_id, invoice_date) {
+            var originalContents = document.body.innerHTML;
+
+            template = `<table border="1" style="width:100%;border: 1px solid #000;">
+                    <td colspan="4" style="padding: 5px;">
+                        <strong>Накладная №${invoice_id} по заказ №{{ order.id }} от {{ order.created }}| {{ order.get_status_display }}</strong>
+                    </td>
+                    <tr>
+                        <td style="padding: 5px;background-color:#ccc;">ДАТА ОТПРАВКИ:</td>
+                        <td style="padding: 5px;">${invoice_date} ВРЕМЯ __:__</td>
+                        <td style="padding: 5px;background-color:#ccc;">От кого/ Kimdan</td>
+                        <td style="padding: 5px;">OOO "SAM-GLASS"</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 5px;background-color:#ccc;">ДАТА ОТПРАВКИ:</td>
+                        <td style="padding: 5px;">${invoice_date} ВРЕМЯ __:__</td>
+                        <td style="padding: 5px;background-color:#ccc;">Кому/ Kimga</td>
+                        <td style="padding: 5px;">{{ order.contr_agent }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding: 5px;">
+                            <strong>ПРИМЕЧАНИЕ:</strong>
+                        </td>
+                    </tr>
+                </table>
+                <table border="1" border="1" style="width:100%;border: 1px solid #000;">
+                    <thead>
+                    <tr>
+                        <th colspan="3" style="padding:5px;">Название товара</th>
+                        <th style="padding:5px;">Толщина(мм)</th>
+                        <th style="padding:5px;">Размер</th>
+                        <th style="padding:5px;">Количество</th>
+                    </tr>
+                    </thead>
+                    <tbody style="">
+                    ${$(`#${invoice_products_id}`).html()}
+                    <tr>
+                        <td colspan="4" style="padding:5px;">Отпустил/Berdim_____________</td>
+                        <td colspan="3" style="padding:5px;">Получил/Oldim________________</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding:5px;"></td>
+                        <td colspan="3" style="padding:5px;">ДОСТАВЩИК: __________</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <br>
+                <br>
+                `;
+
+            template += template;
+
+            document.body.innerHTML = template;
+
+            window.print();
+
+            document.body.innerHTML = originalContents;
+            location.reload()
+
+        }
+
+        {# Add Invoice Items here #}
+
+        let invoiceItems = [];
+
+        function removeInvoiceItem(elemid, id) {
+            $(`#${elemid}`).remove();
+            invoiceItems.splice(invoiceItems.indexOf(id), 1)
+        }
+
+        function addInvoiceItems(id, name, count) {
+            if (!invoiceItems.includes(id)) {
+                invoiceItems.push(id);
+                $('#invoice_add')[0].innerHTML += `<div class="col-12" id="invoice_item_${id}">
+                        <div class="row align-items-end">
+                            <div class="col-md">
+                                <input type="hidden" name="products" value="${id}">
+                                <input type="hidden" name="product_name_${id}" value="${name}">
+                                <p class="d-block my-2">${name}</p>
+                            </div>
+                            <div class="col-md-3">
+                                Количество
+                                <input type="number" step="any" required min="0.1" name="count_${id}" max="${count}" class="form-control" value="${count}"
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-auto">
+                                <button class="btn btn-danger sharp" type="button" onclick="removeInvoiceItem('invoice_item_${id}', ${id})"><i class="fa fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        {# Add order items here #}
+
+        let orderItems = [];
+        let orderItemsValues = {};
+        let orderItemsPrice = {};
+        let orderItemsUSD = {};
+
+        function removeOrderItem(elemid, id) {
+            $(`#${elemid}`).remove();
+            orderItems.splice(orderItems.indexOf(id), 1)
+        }
+
+        function addOrderItem(id, name, price, isGlass, count) {
+            if (!orderItems.includes(id)) {
+
+                for (let oi in orderItems) {
+                    orderItemsValues[orderItems[oi].toString()] = $(`#id_count_${orderItems[oi]}`).val()
+                    orderItemsPrice[orderItems[oi].toString()] = $(`#id_price_${orderItems[oi]}`).val()
+                    orderItemsUSD[orderItems[oi].toString()] = $(`#id_is_currency_${orderItems[oi]}`).is(':checked')
+                }
+                orderItems.push(id);
+                $('#pills-product-tab').trigger("click");
+                $('#order_items_add')[0].innerHTML += `<div class="col-12" id="order_item_${id}">
+                        <div class="row align-items-end">
+                            <div class="col-md">
+                                <input type="hidden" name="products" value="${id}">
+                                <p class="d-block my-2">${name}</p>
+                            </div>
+                            <div class="col-md-3">
+                                Количество
+                                <input type="number" step="any" required min="0.000001" max="${count}" id="id_count_${id}" placeholder="*${count}" name="count_${id}" class="form-control" value=""
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-3">
+                                Цена: <br> В долларах
+                                <input type="checkbox"  onchange="priceConvertation(this, ${id})" id="id_is_currency_${id}" checked name="is_currency_${id}"
+                                       autocomplete="off">
+                                <input type="number" step="any" required min="0.1" name="price_${id}" id="id_price_${id}" class="form-control" value="${price}"
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-auto">
+                                <button class="btn btn-danger sharp" type="button" onclick="removeOrderItem('order_item_${id}', ${id})"><i class="fa fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
+                for (let oiv in orderItemsValues) {
+                    $(`#id_count_${oiv}`).val(orderItemsValues[oiv]);
+                    $(`#id_price_${oiv}`).val(orderItemsPrice[oiv]);
+                    $(`#id_is_currency_${oiv}`).prop('checked', orderItemsUSD[oiv]);
+                }
+            }
+
+            console.log(id, name, price);
+        }
+
+        $(function () {
+            $('.tabs').tabs()
+        });
+
+        function CountFunction(id) {
+            let total = parseFloat(document.getElementById(`order_item_${id}_count`).value) * parseFloat(document.getElementById(`order_item_${id}_price`).textContent)
+            document.getElementById(`order_item_${id}_total`).textContent = total.toString()
+        }
+    </script>
+    <script>
+        function sendAjax(id) {
+            let product = document.getElementById(`wp_product${id}`).value
+            data_js = {
+                {#'csrfmiddlewaretoken':document.getElementsByName('csrfmiddlewaretoken').value,#}
+                'product': product
+            }
+            $.post(
+                '/order/detail/{{ order.id }}',
+                data_js,
+                function (data) {
+                    successFunction(data)
+                }
+            )
+
+            function successFunction(data) {
+                location.reload()
+            }
+
+        }
+    </script>
+    <script>
+        function sendAjaxItem(id) {
+            let total = document.getElementById(`order_item_${id}_total`).textContent;
+            let count = document.getElementById(`order_item_${id}_count`).value;
+            let product_id = document.getElementById(`product_id${id}`).value;
+            data_js_item = {
+                'total': total.toString(),
+                'order_item_id': id.toString(),
+                'count': count.toString(),
+                'product_id': product_id.toString(),
+            }
+            $.post(
+                '/order/detail/{{ order.id }}',
+                data_js_item,
+                function (data) {
+                    sendAjaxItemSucces(data)
+                }
+            )
+
+        }
+
+        function priceConvertation(elem, id) {
+            if (elem.checked === false) {
+                $(`#id_price_${id}`).val(parseFloat(parseFloat($(`#id_price_${id}`)[0].value) * parseFloat(rate)))
+            } else {
+                $(`#id_price_${id}`).val(parseFloat(parseInt($(`#id_price_${id}`)[0].value) / parseFloat(rate)))
+            }
+        }
+
+        function sendAjaxItemSucces(data) {
+            location.reload()
+        }
+
+        function changeTree(id) {
+            $(`#${id}`).toggleClass('d-none');
+        }
+
+        {#   Seporator number_divide.js    #}
+
+    </script>
+{% endblock extra_js %}

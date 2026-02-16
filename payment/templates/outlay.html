@@ -1,0 +1,201 @@
+{% extends 'layouts/base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>Добавить расход</h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                    </div>
+                </div>
+                <form class="row row-cols-3 justify-content-end" method="post">
+                    {% csrf_token %}
+                    {% for f in outlay_payment_form %}
+                        {% if f.errors %}{% for error in f.errors %} {{ error|escape }}
+                        {% endfor %}{% endif %}
+                        {% if f.name == 'outlay_category' %}
+                            <div class="col-md-12 row pl-0">
+                                <div id="id_{{ f.name }}_input_group" class="col-md pl-0">
+                                    {{ f.label_tag }}
+                                    <select name="outlay_category" onchange="changeForm(this)"
+                                            autocomplete="off" class="form-control"
+                                            required="" id="id_outlay_category">
+                                        <option value="" selected="selected">---------</option>
+                                        {% for outlay_category in outlay_categories %}
+                                            <option value="{{ outlay_category.id }}"
+                                                    data_type="{{ outlay_category.type }}">{{ outlay_category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% elif f.name == 'outlay_type' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md pl-0">
+                                    {{ f.label_tag }}
+                                    <select name="outlay_type"
+                                            autocomplete="off" class="form-control"
+                                            required="" id="id_outlay_type">
+                                        <option value="" selected="selected">---------</option>
+                                        {% for outlay in outlay_type %}
+                                            <option id="id_outlay_option_{{ outlay.id }}"
+                                                    value="{{ outlay.id }}"
+                                                    data_type="{{ outlay.outlay_type.pk }}">{{ outlay.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div id="hidden-option" class="d-none">
+
+                                    </div>
+                                </div>
+                                {% elif f.name == 'worker' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md-4 pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                                {% elif f.name == 'car' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md-4 pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                            </div>
+                            <div class="col-12 row pl-0 mt-2">
+                                {% elif f.name == 'payment_amount' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md-4 pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                                {% elif f.name == 'comment' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 row pl-0 mt-2">
+                                {% elif f.name == 'payment_type' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md-4 pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                                {% elif f.name == 'payment_method' %}
+                                <div id="id_{{ f.name }}_input_group" class="col-md-4 pl-0">
+                                    {{ f.label_tag }}
+                                    {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                </div>
+                                <div class="col-md-4 mt-2">
+                                    <button class="btn btn-primary ml-auto mt-4 float-right" type="submit">
+                                        Добавить
+                                    </button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="row page-titles mx-0">
+                    <div class="col-sm-6 p-md-0">
+                        <div class="welcome-text">
+                            <h4>Расходы</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                        <tr>
+                            <th class="align-middle">Юзер</th>
+                            <th class="align-middle">Смма</th>
+                            <th class="align-middle">Описание</th>
+                            <th class="align-middle">Создание</th>
+                        </tr>
+                        </thead>
+                        {% for payment_log in payment_logs %}
+                            <tr class="btn-ravel-trigger">
+                                <td class="py-2 mb-2">{{ payment_log.user }}</td>
+                                {% if payment_log.payment_type == 'uzs' %}
+                                    <td class="p-1">{{ payment_log.amount }} сум</td>
+                                {% elif payment_log.payment_type == 'usd' %}
+                                    <td class="p-1">{{ payment_log.amount }} $</td>
+                                {% endif %}
+                                <td class="py-2">
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-outline-light btn-sm mb-2"
+                                            data-toggle="modal"
+                                            data-target="#exampleModalLong{{ payment_log.id }}">ЕЩЕ
+                                    </button>
+                                    <!-- Modal -->
+                                    <div class="modal fade"
+                                         id="exampleModalLong{{ payment_log.id }}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Описание</h5>
+                                                    <button type="button" class="close"
+                                                            data-dismiss="modal">
+                                                        <span>&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="text-black">{{ payment_log.comment }}</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button"
+                                                            class="btn btn-danger light"
+                                                            data-dismiss="modal">Закрыть
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-2">{{ payment_log.created }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        $(document).ready(function () {
+            inputGroupDisable()
+        });
+
+        function inputGroupDisable() {
+            $('#id_car_input_group').addClass('d-none');
+            $('#id_car').attr('disabled', 'disabled');
+            $('#id_worker_input_group').addClass('d-none');
+            $('#id_worker').attr('disabled', 'disabled');
+            $('#id_outlay_type').children('option').appendTo('#hidden-option')
+        }
+
+        function changeForm(element) {
+            inputGroupDisable();
+            let type = $(`#${element.id}`).children('option:selected').attr('data_type')
+            if (type === 'car') {
+                $('#id_car_input_group').removeClass('d-none');
+                $('#id_car').removeAttr('disabled');
+            }
+            if (type === 'worker') {
+                $('#id_worker_input_group').removeClass('d-none');
+                $('#id_worker').removeAttr('disabled');
+            }
+            let transfer_list = [];
+            for (let elem = 0; elem < $('#hidden-option').children().length; elem++) {
+                if (`${$('#hidden-option').children()[elem].getAttribute('data_type')}` === `${$('#id_outlay_category').children('option:selected').val()}`) {
+                    transfer_list.push(`#${$('#hidden-option').children()[elem].id}`);
+                }
+            }
+            for (let element of transfer_list) {
+                $(element).appendTo('#id_outlay_type');
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'layouts/base.html' %}
+{% load static poll_extras humanize widget_tweaks %}
+{% block content %}
+
+        <!-- row -->
+        <div class="container-fluid">
+            <div class="col-md-4">
+                <h2 class="">Отчеты расходов</h2>
+            </div>
+            <div class="col-xl-12 col-xxl-12">
+                <div class="row">
+                    <div class="col-xl-12 col-xxl-12 col-lg-12 col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="container-fluid mt-0 mb-0">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <input value="{{ startdate }}" class="form-control" type="date"
+                                                               name="startdate">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input value="{{ enddate }}" class="form-control" type="date"
+                                                               name="enddate">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <div class="row">
+                                                    <div class="col-md-7">
+                                                        <div class="row">
+                                                            {% for f in report_outcome_form %}
+                                                                {% if f.errors %}{% for error in f.errors %}
+                                                                    {{ error|escape }}
+                                                                {% endfor %}{% endif %}
+                                                                {% if f.name == 'outlay_category' %}
+                                                                    <div class="col-md-6">
+                                                                        <div id="id_{{ f.name }}_input_group"
+                                                                             class="col-md pl-0">
+                                                                            <select name="category"
+                                                                                    class="form-control bg-white"
+                                                                                    autocomplete="off"
+                                                                                    onchange="changeOutcomeForm(this)"
+                                                                                    required="" id="id_outlay_category">
+                                                                                <option value="all"
+                                                                                        {% if selected_category == 'all' %}
+                                                                                        selected{% endif %}>Категории
+                                                                                </option>
+                                                                                {% for category in category_expenses %}
+                                                                                    <option
+                                                                                            {% if category.id|to_int == selected_category|to_int %}
+                                                                                                selected {% endif %}
+                                                                                                value="{{ category.id }}"
+                                                                                                data_type="{{ category.type }}">{{ category }}</option>
+                                                                                {% endfor %}
+                                                                            </select>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div id="hidden-option" class="d-none">
+
+                                                                    </div>
+                                                                {% elif f.name == 'worker' %}
+                                                                    <div id="id_{{ f.name }}_input_group"
+                                                                         class="col-md-6 pl-0">
+                                                                        {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                                    </div>
+                                                                {% elif f.name == 'car' %}
+                                                                    <div id="id_{{ f.name }}_input_group"
+                                                                         class="col-md-6 pl-0">
+                                                                        {{ f|add_class:'form-control'|attr:'autocomplete:off' }}
+                                                                    </div>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-5">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <a href="{% url 'report-outcome' %}"
+                                                                   class="btn btn-danger float-right">Убрать</a>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <button type="submit" class="btn btn-primary">Поиск
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-responsive-sm mb-0">
+                                        <thead class="thead-primary">
+                                        <tr>
+                                            <th><strong>Юзер</strong></th>
+                                            <th><strong>Сумма</strong></th>
+                                            <th><strong>Метод оплаты</strong></th>
+                                            <th><strong>Создано</strong></th>
+                                            <th><strong>Причина</strong></th>
+                                            <th><strong>Описание</strong></th>
+                                            <th><strong></strong></th>
+                                            <th><strong></strong></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for outlay in report_outcome %}
+                                            <tr class="">
+                                                <td>{{ outlay.user }}</td>
+                                                {% if outlay.payment_type == 'uzs' %}
+                                                    <td>{{ outlay.amount }} сум</td>
+                                                {% else %}
+                                                    <td>{{ outlay.amount }} $</td>
+                                                {% endif %}
+                                                <td>{{ outlay.get_payment_method_display }}</td>
+                                                <td>{{ outlay.created }}</td>
+                                                <td>{{ outlay.outlay_payment|default:'-' }}</td>
+                                                <td>
+                                                    <a href=""
+                                                       data-toggle="modal"
+                                                       data-target="#OutlayTextModal"
+                                                       onclick="OutlayTextModalShow('{{ outlay.user }}', '{{ outlay.comment }}')">
+                                                        <p>{% if outlay.comment|length > 50 %}
+                                                            {{ outlay.comment|slice:50 }}...
+                                                        {% else %}
+                                                            {{ outlay.comment }}
+                                                        {% endif %}</p>
+                                                    </a>
+                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr></tr>
+                                            <tr></tr>
+                                            <tr></tr>
+                                        {% endfor %}
+                                        <tr class="table-primary">
+                                            <td colspan="5">
+                                                <h2>Общий итог</h2>
+                                            </td>
+
+                                            <td>
+                                                <input class="form-control-sm mt-1 border border-secondary bg-primary text-white border-primary"
+                                                       readonly
+                                                        {% if dollar_amount.amount__sum != None %}
+                                                       value="${{ dollar_amount.amount__sum }}"
+                                                        {% else %}
+                                                       value="$ 0"
+                                                        {% endif %}
+                                                       type="text" name="name_dollar_list">
+                                            </td>
+                                            <td>
+                                                <input class="form-control-sm mt-1 border border-secondary bg-primary text-white border-primary"
+                                                       readonly
+                                                        {% if sum_amount.amount__sum != None %}
+                                                       value="{{ sum_amount.amount__sum }} сум"
+                                                        {% else %}
+                                                       value="0 сум"
+                                                        {% endif %}
+                                                       type="text" name="name_sum_list">
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="float-right mt-2 ml-2">
+                                        {% if page_obj.has_other_pages %}
+                                            <div class="pegination">
+                                                <div class="nav-links">
+                                                    {% if page_obj.has_previous %}
+                                                        <a class="page-numbers btn btn-dark btn-xxs"
+                                                           href="?page={{ page_obj.previous_page_number }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_category != '' %}&category={{ selected_category }}{% endif %}">&laquo;</a>
+                                                    {% endif %}
+                                                    {% for p in page_obj.paginator.page_range %}
+
+                                                        {% if page_obj.number == p %}
+                                                            <span class="page-numbers current btn btn-light btn-xxs">{{ p }}</span>
+                                                        {% elif p > page_obj.number|add:-3 and p < page_obj.number|add:3 %}
+                                                            <a class="page-numbers btn btn-primary btn-xxs" href="?page={{ p }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_category != '' %}&category={{ selected_category }}{% endif %}">{{ p }}</a>
+                                                        {% endif %}
+                                                    {% endfor %}
+
+                                                    {% if page_obj.has_next %}
+                                                        <a class="page-numbers btn btn-dark btn-xxs"
+                                                           href="?page={ page_obj.next_page_number }}{% if startdate != '' %}&startdate={{ startdate }}{% endif %}{% if enddate != '' %}&enddate={{ enddate }}{% endif %}{% if selected_category != '' %}&category={{ selected_category }}{% endif %}">&raquo;</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="OutlayTextModal" tabindex="-1" role="dialog" aria-labelledby="OutlayTextModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="OutlayTextModalLabel">Описание расхода <span id="id_outlay_user"></span>
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <span id="outlay_text_name_id"></span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        function OutlayTextModalShow(user, comment) {
+            $(`#id_outlay_user`).text(user)
+            $(`#outlay_text_name_id`).text(comment)
+        }
+
+        $(document).ready(function () {
+            inputGroupDisable()
+        });
+
+        function inputGroupDisable() {
+            $('#id_car_input_group').addClass('d-none');
+            $('#id_car').attr('disabled', 'disabled');
+            $('#id_worker_input_group').addClass('d-none');
+            $('#id_worker').attr('disabled', 'disabled');
+            let request_path = window.location.search.substr(1).split('&').map((elem) => {
+                return elem.split('=')
+            })
+            if (window.location.search.indexOf('worker') > -1) {
+                let option_selected_worker = request_path[3][1]
+                if (request_path[3][1] !== "") {
+                    $(`#id_worker`).children(`option[value*=${option_selected_worker}]`).attr('selected', 'selected');
+                }
+                $('#id_worker_input_group').removeClass('d-none');
+                $('#id_worker').removeAttr('disabled');
+            } else if (window.location.search.indexOf('car') > -1) {
+                let option_selected_car = request_path[3][1]
+                if (request_path[3][1] !== "") {
+                    $(`#id_car`).children(`option[value*=${option_selected_car}]`).attr('selected', 'selected');
+                }
+                $('#id_car_input_group').removeClass('d-none');
+                $('#id_car').removeAttr('disabled');
+            }
+        }
+
+        function changeOutcomeForm(element) {
+            inputGroupDisable();
+            let type = $(`#${element.id}`).children('option:selected').attr('data_type');
+            if ($(`#id_outlay_category`).val() === 'all') {
+                $('#id_worker_input_group').addClass('d-none');
+                $('#id_worker').attr('disabled', 'disabled');
+                $('#id_car_input_group').addClass('d-none');
+                $('#id_car').attr('disabled', 'disabled');
+            }
+            if (type === 'car') {
+                $('#id_car_input_group').removeClass('d-none');
+                $('#id_car').removeAttr('disabled');
+                $('#id_worker_input_group').addClass('d-none');
+                $('#id_worker').attr('disabled', 'disabled');
+            }
+            if (type === 'worker') {
+                $('#id_worker_input_group').removeClass('d-none');
+                $('#id_worker').removeAttr('disabled');
+                $('#id_car_input_group').addClass('d-none');
+                $('#id_car').attr('disabled', 'disabled');
+            }
+        }
+    </script>
+{% endblock extra_js %}

@@ -1,0 +1,94 @@
+{% load static poll_extras %}
+
+<table style="width:100%;text-align:left;">
+    <tr>
+        <td style="width:130px;">
+            <div style="display:block;width:100px;height:100px;">
+                <img src="{% static 'images/logo.png' %}" width="100" height="100">
+            </div>
+        </td>
+        <td>
+            <p>
+                <strong>ПОСТАВЩИК:</strong>
+                ООО «Кафолат Стиль» (Samglass)<br/>
+                <strong>Адрес:</strong> Узбекистан, Самаркандская область, г.Самарканд, поселек "Фархад"<br/>
+                <strong>Контакты:</strong> +99891 542-30-30, +99895 509-30-30, +99895 508-30-30<br/>
+                <strong>E-mail:</strong> uzsamglass@ya.ru, <strong>Сайт:</strong> http://samglass.uz
+            </p>
+        </td>
+        <td>
+
+            <p>
+                <strong>ЗАКАЗЧИК:</strong>
+                {{ order.contr_agent.name|default:"-" }}<br/>
+                <strong>Адрес:</strong> {{ order.contr_agent.address|default:"-" }}<br/>
+                <strong>Контакты:</strong> {{ order.contr_agent.phone|default:"-" }}<br/>
+
+            </p>
+        </td>
+        <td>
+            <div style="display:block;width:100px;height:100px;" id="qrcode"></div>
+        </td>
+    </tr>
+</table>
+<h1 style="text-align:center;font-size:22px;">Заказ №{{ order.id }} от {{ order.created|date:"d.m.Y H:i" }} 08.01.2021
+    14:08</h1>
+<h2 style="text-align:center;font-size:16px;">Статус: {{ order.get_status_display }}</h2>
+<h2 style="text-align:center;font-size:16px;">Список продуктов</h2>
+
+<table style="width:100%;text-align:center;" border="1">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Продукт</th>
+        <th>Размер</th>
+        <th>Кол-во</th>
+        <th>Цена</th>
+        <th>Сумма (UZS)</th>
+        <th>Сумма (USD)</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for order_item in order_items %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {{ order_item.product.title }}</td>
+            <td>{{ order_item.product.size }}</td>
+            <td>{{ order_item.count }}</td>
+            <td>{{ order_item.price }}
+                {% if order_item.total_uzs == 0 %}
+                    ${% else %}сум{% endif %}</td>
+            <td class="divide">{{ order_item.total_uzs }}</td>
+            <td class="divide">{{ order_item.total_usd }}</td>
+        </tr>
+    {% endfor %}
+
+    <tr style="background:#ccc;">
+        <td></td>
+        <td>ИТОГО К ОПЛАТЕ</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>{{ order_items_total.total_uzs__sum|default:0 }}</td>
+        <td>{{ order_items_total.total_usd__sum|default:0 }}</td>
+    </tr>
+
+    </tbody>
+</table>
+<table style="width:100%;text-align:center;margin-top:20px;">
+    <tr>
+        <td>
+            <p>
+                <strong>Касса:</strong><br/>
+                ________________________________
+            </p>
+        </td>
+        <td>
+            <p>
+                <strong>Заказщик:</strong><br/>
+                ________________________________
+            </p>
+        </td>
+    </tr>
+</table>

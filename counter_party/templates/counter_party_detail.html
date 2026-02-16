@@ -1,0 +1,115 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row page-titles mx-0 py-4">
+            <div class="col welcome-text">
+                <h3 class="text-primary m-0">Агент: {{ contr_agent.name }}</h3>
+            </div>
+
+            <div class="dropdown">
+                <button type="button" class="btn btn-primary sharp" data-toggle="dropdown" aria-expanded="false">
+                    <svg width="20px" height="20px" viewBox="0 0 24 24" version="1.1">
+                        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <rect x="0" y="0" width="24" height="24"></rect>
+                            <circle fill="#fff" cx="5" cy="12" r="2"></circle>
+                            <circle fill="#fff" cx="12" cy="12" r="2"></circle>
+                            <circle fill="#fff" cx="19" cy="12" r="2"></circle>
+                        </g>
+                    </svg>
+                </button>
+                <div class="dropdown-menu" x-placement="bottom-start"
+                     style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 33px, 0px);">
+                    <ul>
+                        <li>
+                            <form class="text-center" action="{% url 'counter_party_update' contr_agent.pk %}"
+                                  id="agent_delete"
+                                  method="get">
+                                <input type="hidden" name="back_url" value="counter_party_detail">
+                                <input type="hidden" name="pk" value="{{ contr_agent.id }}">
+                                <button type="submit"
+                                        class="btn btn-transparent">
+                                    Редактировать
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="col-lg-12">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-sm table-hover table-striped">
+
+                                    <tbody>
+                                    <tr>
+                                        <table id="w0" class="table table-striped table-bordered detail-view">
+                                            <tbody>
+                                            <tr>
+                                                <th>Статус</th>
+                                                <td>{{ contr_agent.get_status_display|default:'-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Название организации</th>
+
+                                                <td>{{ contr_agent.org_name|default:'-' }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>Номер телефона</th>
+                                                <td>{{ contr_agent.phone|default:'-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Создано</th>
+                                                <td>{{ contr_agent.created_at|default:'-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Информация</th>
+                                                <td>{{ contr_agent.extra_info|default:'-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Пользователь</th>
+                                                <td>{{ contr_agent.user|default:'-' }}</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Баланс</h4>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-bordered table-sm table-hover table-striped">
+                                <tbody>
+                                <tr>
+                                    <td class="">Сум</td>
+                                    <td class="divide">{{ contr_agent.balance_uzs }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="">Доллар</td>
+                                    <td class="divide">{{ contr_agent.balance_usd }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

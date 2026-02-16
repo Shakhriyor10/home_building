@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Агенты</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'counter_party_create' %}">Добавить</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)"></a></li>
+                </ol>
+            </div>
+        </div>
+        <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th class="align-middle">Ф.И.О</th>
+                            <th class="align-middle pr-7">Организация</th>
+                            <th class="align-middle">Номер телефона</th>
+                            <th class="align-middle">Баланс (доллар)</th>
+                            <th class="align-middle">Баланс (сумм)</th>
+                        </tr>
+                    </thead>
+                        {% for contr_agent in contr_agents %}
+                            <tr class="btn-ravel-trigger">
+                                <td class="py-2 mb-2">{{ contr_agent.name }}</td>
+                                <td class="py-2">{{ contr_agent.org_name }}</td>
+                                <td class="py-2">{{ contr_agent.phone }}</td>
+                                <td class="py-2">{{ contr_agent.balance_usd }}</td>
+                                <td class="py-2">{{ contr_agent.balance_uzs }}</td>
+                                <td class="py-2">{{ contr_agent.created_at|date:"SHORT_DATE_FORMAT" }}</td>
+                                <td class="py-2"><a href="{% url 'counter_party_update' contr_agent.pk %}"><i class="fa fa-pencil"></i></a></td>
+                                <td class="py-2"><a href="{% url 'counter_party_detail' contr_agent.pk %}"><i class="fas fa-eye"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
