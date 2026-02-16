@@ -42,7 +42,7 @@
         <th>#</th>
         <th>Продукт</th>
         <th>Размер</th>
-        <th>Кол-во</th>
+        <th>Кол-во (кг)</th>
         <th>Цена</th>
         <th>Сумма (UZS)</th>
         <th>Сумма (USD)</th>
@@ -55,7 +55,7 @@
             <td>
                 {{ order_item.product.title }}</td>
             <td>{{ order_item.product.size }}</td>
-            <td>{{ order_item.count }}</td>
+            <td>{{ order_item.count }} кг</td>
             <td>{{ order_item.price }}
                 {% if order_item.total_uzs == 0 %}
                     ${% else %}сум{% endif %}</td>

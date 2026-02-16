@@ -53,7 +53,7 @@
                                         rowspan="1"
                                         colspan="1"
                                         aria-label="Age: activate to sort column ascending"
-                                    >Количество
+                                    >Количество (кг)
                                     </th>
 
                                     <th tabindex="0" aria-controls="example" rowspan="1"
@@ -73,7 +73,7 @@
                                         </td>
                                         <td>{{ product.code }}</td>
                                         <td>{{ product.price }}</td>
-                                        <td>{{ product.count }}</td>
+                                        <td>{{ product.count }} кг</td>
                                         <td class="">
                                             <form action="{% url 'product_update' product.pk %}"
                                                   method="get">

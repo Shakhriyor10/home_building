@@ -47,12 +47,12 @@
                                         <th rowspan="2">Продукт</th>
                                         <th colspan="2">Приход</th>
                                         <th>Расход</th>
-                                        <th rowspan="2">Кол. в складе</th>
+                                        <th rowspan="2">Кол. в складе (кг)</th>
                                     </tr>
                                     <tr>
-                                        <th>Покупка сырья</th>
-                                        <th>Возврат</th>
-                                        <th>Продано</th>
+                                        <th>Покупка сырья (кг)</th>
+                                        <th>Возврат (кг)</th>
+                                        <th>Продано (кг)</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -60,10 +60,10 @@
                                         <tr>
                                             <td>{{ product.id }}</td>
                                             <td>{{ product }}</td>
-                                            <td>{{ product.product_income_total|default:0 }}</td>
-                                            <td>{{ product.product_return_item_total|default:0 }}</td>
-                                            <td>{{ product.product_order_total|default:0 }}</td>
-                                            <td>{{ product.count|default:0 }}</td>
+                                            <td>{{ product.product_income_total|default:0 }} кг</td>
+                                            <td>{{ product.product_return_item_total|default:0 }} кг</td>
+                                            <td>{{ product.product_order_total|default:0 }} кг</td>
+                                            <td>{{ product.count|default:0 }} кг</td>
                                         </tr>
                                     {% endfor %}
                                     </tbody>

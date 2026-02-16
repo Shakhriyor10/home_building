@@ -31,7 +31,7 @@ class OrderItem(models.Model):
                                 related_name='order_item',
                                 on_delete=models.PROTECT)
     count = models.FloatField(default=0,
-                              verbose_name='Количество')
+                              verbose_name='Количество (кг)')
     price = models.FloatField(default=0,
                               verbose_name='Цена')
     status = models.SmallIntegerField(default=0,
@@ -51,7 +51,7 @@ class OrderItem(models.Model):
 class OrderReturnItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     count = models.FloatField(default=0,
-                              verbose_name='Количество')
+                              verbose_name='Количество (кг)')
     status = models.SmallIntegerField(default=0,
                                       verbose_name='Статус')
     order_item = models.ForeignKey('OrderItem',
