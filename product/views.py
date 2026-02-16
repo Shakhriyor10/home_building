@@ -26,14 +26,14 @@ class ProductView(ListView):
 class ProductCreate(CreateView):
     template_name = 'product_create.html'
     model = Product
-    fields = ['title', 'size', 'price', 'status', 'code']
+    fields = ['title', 'price', 'status', 'code']
     success_url = '/'
 
 
 class ProductUpdate(UpdateView):
     template_name = 'product_udate.html'
     model = Product
-    fields = ['title', 'size', 'price', 'status', 'code']
+    fields = ['title', 'price', 'status', 'code']
     success_url = '/'
 
 

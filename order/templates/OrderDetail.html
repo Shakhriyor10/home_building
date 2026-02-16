@@ -107,7 +107,6 @@
                                 <thead class="">
                                 <tr>
                                     <th style="min-width: 300px">Продукт</th>
-                                    <th style="min-width: 100px">Размер</th>
                                     <th style="min-width: 100px">Количество (кг)</th>
                                     <th style="min-width: 100px">Цена</th>
                                     <th style="min-width: 150px">Сумма (UZS)</th>
@@ -123,7 +122,6 @@
                                         <td>
                                             {{ order_item.product.title }}
                                         </td>
-                                        <td>{{ order_item.product.size }}</td>
                                         <td>{{ order_item.count }} кг</td>
                                         <td class=>{{ order_item.price }}
                                             {% if order_item.total_uzs == 0 %}
@@ -153,7 +151,7 @@
                                                         data-toggle="modal"
                                                         data-target="#orderChangeItemAdd"
                                                         onclick="orderChangeItem(`order_change_item_{{ order_item.id }}_button`)"
-                                                        data-product-name="{{ order_item.product.title }} | {{ order_item.product.size }}"
+                                                        data-product-name="{{ order_item.product.title }}"
                                                         data-product-count="{{ order_item.count }}"
                                                         data-product-id="{{ order_item.id }}">
                                                     <i class="fa fa-arrow-down"></i>
@@ -172,7 +170,6 @@
                                     <thead class="">
                                     <tr>
                                         <th style="min-width: 300px">Продукт</th>
-                                        <th style="min-width: 100px">Размер</th>
                                         <th style="min-width: 100px">Кол-во</th>
                                         <th style="min-width: 100px">Цена</th>
                                         <th style="min-width: 150px">Сумма (UZS)</th>
@@ -185,7 +182,6 @@
                                             <td>
                                                 {{ order_return_item.order_item.product.title }}
                                             </td>
-                                            <td>{{ order_return_item.order_item.product.size }}</td>
                                             <td>{{ order_return_item.count }} кг</td>
                                             <td class=>{{ order_return_item.order_item.price }}
                                                 {% if order_return_item.total_uzs == 0 %}
@@ -299,7 +295,7 @@
                                     <div class="tab-content">
                                         {% for product in products %}
                                             <a class="d-block mouse-pointer"
-                                               ondblclick="{% if product.count > 0 %}addOrderItem(parseInt({{ product.id }}), '{{ product.title }} | {{ product.size }}', parseFloat('0'), true, parseFloat({{ product.count }})){% endif %}">---- {{ product.title }} | {{ product.size }}
+                                               ondblclick="{% if product.count > 0 %}addOrderItem(parseInt({{ product.id }}), '{{ product.title }}', parseFloat('0'), true, parseFloat({{ product.count }})){% endif %}">---- {{ product.title }}
                                                 <span class="bg-success btn btn-xs p-1 text-white">{{ product.count }} кг</span></a>
                                         {% endfor %}
                                     </div>
@@ -488,19 +484,18 @@
                     <tr>
                         <th colspan="3" style="padding:5px;">Название товара</th>
                         <th style="padding:5px;">Толщина(мм)</th>
-                        <th style="padding:5px;">Размер</th>
                         <th style="padding:5px;">Количество (кг)</th>
                     </tr>
                     </thead>
                     <tbody style="">
                     ${$(`#${invoice_products_id}`).html()}
                     <tr>
-                        <td colspan="4" style="padding:5px;">Отпустил/Berdim_____________</td>
-                        <td colspan="3" style="padding:5px;">Получил/Oldim________________</td>
+                        <td colspan="3" style="padding:5px;">Отпустил/Berdim_____________</td>
+                        <td colspan="2" style="padding:5px;">Получил/Oldim________________</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding:5px;"></td>
-                        <td colspan="3" style="padding:5px;">ДОСТАВЩИК: __________</td>
+                        <td colspan="3" style="padding:5px;"></td>
+                        <td colspan="2" style="padding:5px;">ДОСТАВЩИК: __________</td>
                     </tr>
                     </tbody>
                 </table>

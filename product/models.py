@@ -6,8 +6,6 @@ from product.choices import PRODUCT_PRODUCT_STATUS
 class Product(models.Model):
     title = models.CharField(verbose_name='Название',
                              max_length=255)
-    size = models.CharField(verbose_name='Размер(ШхВхТ)', blank=True, null=True,
-                            max_length=255)
     price = models.FloatField(verbose_name='Цена',
                               default=0)
     code = models.CharField(verbose_name='Код продукта',
