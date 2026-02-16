@@ -14,7 +14,7 @@ class Product(models.Model):
                             max_length=255,
                             null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-    count = models.FloatField(verbose_name='Количество', default=0)
+    count = models.FloatField(verbose_name='Количество (кг)', default=0)
     status = models.CharField(max_length=255,
                               choices=PRODUCT_PRODUCT_STATUS,
                               verbose_name='Статус',
